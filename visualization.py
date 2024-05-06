@@ -10,7 +10,7 @@ from sklearn.decomposition import TruncatedSVD
 from sklearn.preprocessing import MinMaxScaler
 from icecream import ic
 from utils import pad_sizes
-
+import ast
 
 @st.cache_data
 def create_frames(stats_stacked: Dict[str, Dict[str, List[Any]]], role: str) -> List[Frame]:
@@ -127,7 +127,12 @@ def build_figure(frames: List[Frame], role: str, animation_speed: int=400) -> go
     else:
         return Figure()
 
-def plot_population_contours(df: pd.DataFrame, coord_axis: str, z_axis: str, title: str, x_label: str, y_label: str) -> Tuple[Figure, Figure]:
+import ast
+import pandas as pd
+import plotly.graph_objects as go
+from typing import Tuple
+
+def plot_population_contours(df: pd.DataFrame, coord_axis: str, z_axis: str, title: str, x_label: str, y_label: str) -> Tuple[go.Figure, go.Figure]:
     """
     Plots a contour chart for population data across specified indices and columns.
 
@@ -140,42 +145,67 @@ def plot_population_contours(df: pd.DataFrame, coord_axis: str, z_axis: str, tit
     y_label (str): Label for the Y-axis.
     """
     
-    df_temp = pd.DataFrame()
-    df_temp[['x', 'y']] = df[coord_axis].apply(pd.Series)
-    df_temp['role'] = df['role']
-    df_temp[z_axis] = df[z_axis]
+    df_prey = df[df['role'] == 'prey'].copy()
+    df_predator = df[df['role'] == 'predator'].copy()
     
-    fig_prey = go.Figure()
-    fig_predator = go.Figure()
-
-    for role in ['prey', 'predator']:
-        df_role = df_temp[df_temp['role'] == role]
-        
-        fig = go.Figure(data=go.Contour(
-            z=df_role[z_axis],
-            x=df_role['x'],
-            y=df_role['y'],
-            colorscale='Viridis',
-            contours=dict(
-                coloring='heatmap',
-                showlabels=True,
-                labelfont=dict(size=12, color='white')
-            ),
-            colorbar=dict(title=z_axis)
-        ))
-        
-        fig.update_layout(
-            title=f"{title} of {role.capitalize()}s",
-            xaxis_title=x_label,
-            yaxis_title=y_label,
-            width=800,
-            height=600
-        )
-        
-        if role == 'prey':
-            fig_prey = fig
-        else:
-            fig_predator = fig
+    df_prey['x'] = df_prey[coord_axis].apply(lambda x: ast.literal_eval(x)[0])
+    df_prey['y'] = df_prey[coord_axis].apply(lambda x: ast.literal_eval(x)[1])
+    
+    df_predator['x'] = df_predator[coord_axis].apply(lambda x: ast.literal_eval(x)[0])
+    df_predator['y'] = df_predator[coord_axis].apply(lambda x: ast.literal_eval(x)[1])
+    
+    # Group by coord_axis and compute the mean of z_axis for each group
+    df_prey_grouped = df_prey.groupby(coord_axis)[z_axis].mean().reset_index()
+    df_predator_grouped = df_predator.groupby(coord_axis)[z_axis].mean().reset_index()
+    
+    # Extract the unique x and y values from the grouped DataFrames
+    df_prey_grouped['x'] = df_prey_grouped[coord_axis].apply(lambda x: ast.literal_eval(x)[0])
+    df_prey_grouped['y'] = df_prey_grouped[coord_axis].apply(lambda x: ast.literal_eval(x)[1])
+    
+    df_predator_grouped['x'] = df_predator_grouped[coord_axis].apply(lambda x: ast.literal_eval(x)[0])
+    df_predator_grouped['y'] = df_predator_grouped[coord_axis].apply(lambda x: ast.literal_eval(x)[1])
+    
+    fig_prey = go.Figure(data=go.Contour(
+        z=df_prey_grouped[z_axis],
+        x=df_prey_grouped['x'],
+        y=df_prey_grouped['y'],
+        colorscale='Viridis',
+        contours=dict(
+            coloring='heatmap',
+            showlabels=True,
+            labelfont=dict(size=12, color='white')
+        ),
+        colorbar=dict(title=z_axis)
+    ))
+    
+    fig_prey.update_layout(
+        title=f"{title} of Preys",
+        xaxis_title=x_label,
+        yaxis_title=y_label,
+        width=800,
+        height=600
+    )
+    
+    fig_predator = go.Figure(data=go.Contour(
+        z=df_predator_grouped[z_axis],
+        x=df_predator_grouped['x'],
+        y=df_predator_grouped['y'],
+        colorscale='Viridis',
+        contours=dict(
+            coloring='heatmap',
+            showlabels=True,
+            labelfont=dict(size=12, color='white')
+        ),
+        colorbar=dict(title=z_axis)
+    ))
+    
+    fig_predator.update_layout(
+        title=f"{title} of Predators",
+        xaxis_title=x_label,
+        yaxis_title=y_label,
+        width=800,
+        height=600
+    )
     
     return fig_prey, fig_predator
 

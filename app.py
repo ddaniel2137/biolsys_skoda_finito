@@ -145,19 +145,19 @@ def main():
                 results_grid_mut = search_optimal_parameters_parallel(
                     grid_params = {
                         'mutation_probabilities': (
-                            [0.1, 0.3, 0.5, 0.7, 0.9],
-                            [0.1, 0.3, 0.5, 0.7, 0.9]
+                            [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                            [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
                         ),
                         'mutation_effects': (
-                            [0.1, 0.3, 0.5, 0.7, 0.9],
-                            [0.1, 0.3, 0.5, 0.7, 0.9]
+                            [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                            [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
                         )
                     }
                 )
-                st.session_state['results_grid_mut'] = results_grid_mut
                 results_grid_mut.to_csv('results_grid_mut.csv', index=False)
+            st.session_state['results_grid_mut'] = results_grid_mut
         else:
-            results_grid_mut = st.session_state['results_grid_mut']
+            pass
         
         if 'results_grid_coef' not in st.session_state:
             if os.path.exists('results_grid_coef.csv'):
@@ -166,16 +166,15 @@ def main():
                 results_grid_coef = search_optimal_parameters_parallel(
                 grid_params = {
                     'fitness_coefficients': (
-                        [0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.5, 5.0, 10.0, 100.0],
-                        [0.1, 0.3, 0.5, 0.7, 0.9, 1.0, 1.5, 5.0, 10.0, 100.0],
+                        [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 2.0, 5.0, 10.0, 20.0, 50.0, 75.0, 100.0],
+                        [0.1, 0.3, 0.5, 0.7, 0.9, 1.1, 2.0, 5.0, 10.0, 20.0, 50.0, 75.0, 100.0],
                         )
                     }
                 )
-                st.session_state['results_grid_coef'] = results_grid_coef
                 results_grid_coef.to_csv('results_grid_coef.csv', index=False)
-        else:
-            results_grid_coef = st.session_state['results_grid_coef']
             st.session_state['results_grid_coef'] = results_grid_coef
+        else:
+            pass
 
         if 'results_grid_interactions' not in st.session_state:
             if os.path.exists('results_grid_interactions.csv'):
@@ -189,11 +188,14 @@ def main():
                         )
                     }
                 )
-                st.session_state['results_grid_interactions'] = results_grid_interactions
                 results_grid_interactions.to_csv('results_grid_interactions.csv', index=False)
-        else:
-            results_grid_interactions = st.session_state['results_grid_interactions']
             st.session_state['results_grid_interactions'] = results_grid_interactions
+        else:
+            pass
+
+        st.dataframe(st.session_state['results_grid_mut'])
+        st.dataframe(st.session_state['results_grid_coef'])
+        st.dataframe(st.session_state['results_grid_interactions'])
         st.write('Grid search complete!')
         st.write('End of grid search results.')
         
@@ -208,20 +210,20 @@ def main():
 
         col_contours = st.columns(3)
         with col_contours[0]:
-            fig_prey, fig_predator = plot_population_contours(st.session_state['results_grid_coef'], 'fitness_coefficients', 'mean_fitness', 'Fitness coefficients vs mean fitness', 'Fitness Coefficients (prey)', 'Fitness Coefficients (predator)')
+            fig_prey, fig_predator = plot_population_contours(st.session_state['results_grid_coef'], 'fitness_coefficients', 'size', 'Fitness coefficients vs mean fitness', 'Fitness Coefficients (prey)', 'Fitness Coefficients (predator)')
             st.plotly_chart(fig_prey, use_container_width=True)
             st.plotly_chart(fig_predator, use_container_width=True)
         
         with col_contours[1]:
-            fig_prey, fig_predator = plot_population_contours(st.session_state['results_grid_interactions'], 'interaction_values', 'mean_fitness', 'Interaction Values vs mean fitness', 'Interaction Values (prey)', 'Interaction Values (predator)')
+            fig_prey, fig_predator = plot_population_contours(st.session_state['results_grid_interactions'], 'interaction_values', 'size', 'Interaction Values vs mean fitness', 'Interaction Values (prey)', 'Interaction Values (predator)')
             st.plotly_chart(fig_prey, use_container_width=True)
             st.plotly_chart(fig_predator, use_container_width=True)
 
         with col_contours[2]:
-            fig_prey_effect, fig_predator_effect = plot_population_contours(st.session_state['results_grid_mut'], 'mutation_effects', 'mean_fitness', 'Mutation Effects vs mean fitness', 'Mutation effects (prey)', 'Mutation effects (predator)')
+            fig_prey_effect, fig_predator_effect = plot_population_contours(st.session_state['results_grid_mut'], 'mutation_effects', 'size', 'Mutation Effects vs mean fitness', 'Mutation effects (prey)', 'Mutation effects (predator)')
             st.plotly_chart(fig_prey_effect, use_container_width=True)
             st.plotly_chart(fig_predator_effect, use_container_width=True)
-            fig_prey_chance, fig_predator_chance = plot_population_contours(st.session_state['results_grid_mut'], 'mutation_probabilities', 'mean_fitness', 'Mutation Probabilities vs mean fitness', 'Mutation Probabilities (prey)', 'Mutation Probabilities (predator)')
+            fig_prey_chance, fig_predator_chance = plot_population_contours(st.session_state['results_grid_mut'], 'mutation_probabilities', 'size', 'Mutation Probabilities vs mean fitness', 'Mutation Probabilities (prey)', 'Mutation Probabilities (predator)')
             st.plotly_chart(fig_prey_chance, use_container_width=True)
             st.plotly_chart(fig_predator_chance, use_container_width=True)
 

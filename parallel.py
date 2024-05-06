@@ -26,7 +26,7 @@ def run_simulation_and_preprocess(params: Dict[str, Any], fixed_params: Dict[str
 def search_optimal_parameters_parallel(
         roles: List[str] = ['prey', 'predator'],
         num_populations: int = 2,
-        num_generations: int = 200,
+        num_generations: int = 100,
         scenario: str = 'global_warming',
         global_warming_scale: float = 1.0,
         global_warming_var: float = 0.05,
@@ -36,7 +36,7 @@ def search_optimal_parameters_parallel(
         seed: int = 42,
         optimal_genotypes: Optional[np.ndarray] = None,
         num_genes: List[int] = [5, 5],
-        init_populations: List[int] = [200, 200],
+        init_populations: List[int] = [400, 300],
         max_num_children: List[int] = [2, 2],
         max_populations: List[int] = [10000, 10000],
         grid_params: Dict[str, Any] =  {
@@ -52,9 +52,9 @@ def search_optimal_parameters_parallel(
     ):
     
     grid_params_set = {
-        'fitness_coefficients': [0.9, 0.9],
+        'fitness_coefficients': [1.0, 0.6],
         'mutation_effects': [0.1, 0.1],
-        'interaction_values': [-0.4, 0.75],
+        'interaction_values': [-0.5, 0.75],
         'mutation_probabilities': [0.3, 0.3]
     }
     #ic(grid_params_set)
